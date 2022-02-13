@@ -1,9 +1,42 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import { useEffect, useState } from 'react'
 
-const Home: NextPage = () => {
+const Home = () => {
+  // const {temp , setTemp} = useState(null)  
+  // create a usestate for temparatue 
+  // const [humidity , setHumidity] = useState(0);
+  const [coordis, setCoordis] = useState({lng: 0 , lat: 0});
+  const [humidity , setHumidity] = useState(null);
+  const [status , setStatus] = useState(false);  
+  const [status2 , setStatus2] = useState(false);
+
+  const getLocation = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      // setStatus(null);
+      setCoordis({lat: position.coords.latitude, lng: position.coords.longitude});
+      setStatus(true);
+      // setLng(position.coords.longitude);
+    })
+  }
+
+  const fetchDate = async () => {
+      const response = await fetch(`https://weather-proxy.freecodecamp.rocks/api/current?lat=${coordis.lat}&lon=${coordis.lng}`);
+      const data = await response.json()
+      setHumidity(data.main.temp)
+      if ( humidity !== null) {
+        setStatus2(true)
+      }
+      
+    }
+  useEffect(() => {
+    getLocation()
+  },[])
+  useEffect(() => {
+    fetchDate()
+  },[status])
+  console.log(status2)
   return (
     <div className={styles.container}>
       <Head>
@@ -13,44 +46,17 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        <h1>Weather app</h1>
+        {
+          status2 && (
+            <div>
+              <h2>{humidity} °C</h2>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+              </div>
+          )
+        }
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+       
       </main>
 
       <footer className={styles.footer}>
